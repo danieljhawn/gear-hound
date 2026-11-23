@@ -14,6 +14,13 @@ def test_settings_have_mvp_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.database_url == "sqlite:////data/gear-hound.db"
     assert settings.max_price == 500
     assert settings.region == "austin"
+    assert settings.craigslist_area_url == "https://www.craigslist.org/area/austin"
+    assert settings.guitar_center_store_names == ("Round Rock", "Austin", "South Austin")
+    assert settings.guitar_center_store_urls == (
+        "https://www.guitarcenter.com/Round-Rock/Used",
+        "https://www.guitarcenter.com/Austin/Used",
+        "https://www.guitarcenter.com/South-Austin?filters=condition:Used&Ns=cD",
+    )
 
 
 def test_settings_accept_environment_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
