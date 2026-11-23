@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    expose:
+      - "8000"
+    environment:
+      GEAR_HOUND_ENV: production
+      GEAR_HOUND_DATABASE_URL: sqlite:////data/gear-hound.db
+      GEAR_HOUND_MAX_PRICE: "500"
+      GEAR_HOUND_REGION: austin
+    volumes:
+      - gear_hound_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.gear-hound.rule: "Host(`gear.overstimulationstation.com`)"
+      traefik.http.routers.gear-hound.entrypoints: websecure
+      traefik.http.routers.gear-hound.tls: "true"
+      traefik.http.routers.gear-hound.tls.certresolver: letsencrypt
+      traefik.http.routers.gear-hound.middlewares: gear-hound-auth
+      traefik.http.middlewares.gear-hound-auth.basicauth.users: "${GEAR_HOUND_BASIC_AUTH:?Set GEAR_HOUND_BASIC_AUTH}"
+      traefik.http.middlewares.gear-hound-auth.basicauth.removeheader: "true"
+      traefik.http.services.gear-hound.loadbalancer.server.port: "8000"
+
+volumes:
+  gear_hound_data:
