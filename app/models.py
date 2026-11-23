@@ -1,7 +1,17 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -55,3 +65,53 @@ class ListingObservation(Base):
     available: Mapped[bool] = mapped_column(Boolean, nullable=False)
     title: Mapped[str | None] = mapped_column(String(1000))
     location: Mapped[str | None] = mapped_column(String(255))
+
+
+class ListingState(Base):
+    __tablename__ = "listing_states"
+    __table_args__ = (
+        CheckConstraint("state IN ('normal', 'interested', 'hidden')", name="ck_listing_state"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    listing_id: Mapped[int] = mapped_column(
+        ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    state: Mapped[str] = mapped_column(String(20), default="normal", nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class OwnedGear(Base):
+    __tablename__ = "owned_gear"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
+    aliases: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    category: Mapped[str | None] = mapped_column(String(100))
+    available_for_trade: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+class TradeDetail(Base):
+    __tablename__ = "trade_details"
+    __table_args__ = (
+        CheckConstraint(
+            "match_type IN ('offers-interest', 'wants-owned', 'two-way', 'uncertain')",
+            name="ck_trade_match_type",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    listing_id: Mapped[int] = mapped_column(
+        ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    trade_phrases: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    offered_text: Mapped[str | None] = mapped_column(Text)
+    wanted_text: Mapped[str | None] = mapped_column(Text)
+    trade_only: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    match_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    matched_terms: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    explanation: Mapped[str] = mapped_column(Text, nullable=False)
