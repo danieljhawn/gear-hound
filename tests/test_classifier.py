@@ -20,6 +20,16 @@ from app.services.classifier import classify_title
         ("Vintage Ludwig snare stand", None),
         ("Bass drum spur legs", None),
         ("Yamaha electronic drum pad", None),
+        ("Bach Stradivarius trumpet", None),
+        ("Conn 88H trombone with case", None),
+        ("Jupiter student French horn", None),
+        ("Yamaha YAS-23 saxophone", None),
+        ("Full size student violin with bow", None),
+        ("Old fiddle in case", None),
+        ("Sousaphone for sale", None),
+        ("Baritone guitar, 27 inch scale", "Guitar"),
+        ("Fender Bassman amp", "Amps"),
+        ("Saxony-style analog synth", "Synths/Keys"),
     ],
 )
 def test_classify_title_keeps_interesting_gear_and_excludes_routine_drums(
