@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gear Hound</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+  <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body>
   <header class="site-header">
@@ -13,15 +13,16 @@
       <h1>Gear Hound</h1>
       <p class="lede">Used instruments, strange electronics, and future barter bait.</p>
     </div>
-    <div class="count">{{ listings|length }} finds under $500</div>
+    <div class="count">{{ cards|length }} finds under $500</div>
   </header>
 
   <main>
     {% if error %}<div class="error">{{ error }}</div>{% endif %}
-    {% if not listings and not error %}<div class="empty">No matching listings found.</div>{% endif %}
+    {% if not cards and not error %}<div class="empty">No matching listings found.</div>{% endif %}
     <section class="grid" aria-label="Gear listings">
-      {% for listing in listings %}
-      <article class="card">
+      {% for card in cards %}
+      {% set listing = card.listing %}
+      <article class="card {{ card.state }}">
         <a class="image-wrap" href="{{ listing.url }}" target="_blank" rel="noopener noreferrer">
           {% if listing.image_url %}
           <img src="{{ listing.image_url }}" alt="" loading="lazy">
@@ -38,6 +39,20 @@
           <div class="footer-row">
             <strong>{% if listing.price_cents is not none %}${{ '%.0f'|format(listing.price_cents / 100) }}{% else %}TRADE{% endif %}</strong>
             <span>CRAIGSLIST ↗</span>
+          </div>
+          <div class="actions">
+            <form method="post" action="/listings/state">
+              <input type="hidden" name="source" value="{{ listing.source }}">
+              <input type="hidden" name="source_listing_id" value="{{ listing.source_listing_id }}">
+              <input type="hidden" name="state" value="{% if card.state == 'interested' %}normal{% else %}interested{% endif %}">
+              <button class="favorite" type="submit">{% if card.state == 'interested' %}★ Unfavorite{% else %}☆ Favorite{% endif %}</button>
+            </form>
+            <form method="post" action="/listings/state">
+              <input type="hidden" name="source" value="{{ listing.source }}">
+              <input type="hidden" name="source_listing_id" value="{{ listing.source_listing_id }}">
+              <input type="hidden" name="state" value="hidden">
+              <button class="ignore" type="submit">Ignore</button>
+            </form>
           </div>
         </div>
       </article>
