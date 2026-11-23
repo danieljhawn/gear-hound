@@ -13,10 +13,63 @@
       <h1>Gear Hound</h1>
       <p class="lede">Used instruments, strange electronics, and future barter bait.</p>
     </div>
-    <div class="count">{{ cards|length }} finds under $500</div>
+    <div class="count">{{ cards|length }} of {{ total_visible }} visible</div>
   </header>
 
   <main>
+    <form class="filters" method="get" action="/">
+      <label class="wide">Keywords
+        <input type="search" name="q" value="{{ filters.q }}" placeholder="bass, synth, pedal…">
+      </label>
+      <label>Min price
+        <input type="number" name="min_price" min="0" step="1" value="{{ filters.min_price if filters.min_price is not none else '' }}" placeholder="$0">
+      </label>
+      <label>Max price
+        <input type="number" name="max_price" min="0" step="1" value="{{ filters.max_price if filters.max_price is not none else '' }}" placeholder="$500">
+      </label>
+      <label>First seen
+        <select name="age_days">
+          <option value=""{% if filters.age_days is none %} selected{% endif %}>Any time</option>
+          <option value="1"{% if filters.age_days == 1 %} selected{% endif %}>24 hours</option>
+          <option value="3"{% if filters.age_days == 3 %} selected{% endif %}>3 days</option>
+          <option value="7"{% if filters.age_days == 7 %} selected{% endif %}>7 days</option>
+          <option value="14"{% if filters.age_days == 14 %} selected{% endif %}>14 days</option>
+          <option value="30"{% if filters.age_days == 30 %} selected{% endif %}>30 days</option>
+        </select>
+      </label>
+      <label>Source
+        <select name="source">
+          <option value="all"{% if filters.source == 'all' %} selected{% endif %}>All sources</option>
+          {% for value, label in source_options %}<option value="{{ value }}"{% if filters.source == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Category
+        <select name="category">
+          <option value="all"{% if filters.category == 'all' %} selected{% endif %}>All categories</option>
+          {% for value in category_options %}<option value="{{ value }}"{% if filters.category == value %} selected{% endif %}>{{ value }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Favorites
+        <select name="state">
+          <option value="all"{% if filters.state == 'all' %} selected{% endif %}>All visible</option>
+          <option value="interested"{% if filters.state == 'interested' %} selected{% endif %}>Favorites only</option>
+          <option value="normal"{% if filters.state == 'normal' %} selected{% endif %}>Not favorited</option>
+        </select>
+      </label>
+      <label>Sort
+        <select name="sort">
+          <option value="newest"{% if filters.sort == 'newest' %} selected{% endif %}>First seen: newest</option>
+          <option value="oldest"{% if filters.sort == 'oldest' %} selected{% endif %}>First seen: oldest</option>
+          <option value="price_asc"{% if filters.sort == 'price_asc' %} selected{% endif %}>Price: low to high</option>
+          <option value="price_desc"{% if filters.sort == 'price_desc' %} selected{% endif %}>Price: high to low</option>
+          <option value="title"{% if filters.sort == 'title' %} selected{% endif %}>Title: A–Z</option>
+        </select>
+      </label>
+      <div class="filter-actions">
+        <button type="submit">Apply</button>
+        <a href="/">Reset</a>
+      </div>
+    </form>
     {% if error %}<div class="error">{{ error }}</div>{% endif %}
     {% if not cards and not error %}<div class="empty">No matching listings found.</div>{% endif %}
     <section class="grid" aria-label="Gear listings">
@@ -45,12 +98,14 @@
               <input type="hidden" name="source" value="{{ listing.source }}">
               <input type="hidden" name="source_listing_id" value="{{ listing.source_listing_id }}">
               <input type="hidden" name="state" value="{% if card.state == 'interested' %}normal{% else %}interested{% endif %}">
+              <input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
               <button class="favorite" type="submit">{% if card.state == 'interested' %}★ Unfavorite{% else %}☆ Favorite{% endif %}</button>
             </form>
             <form method="post" action="/listings/state">
               <input type="hidden" name="source" value="{{ listing.source }}">
               <input type="hidden" name="source_listing_id" value="{{ listing.source_listing_id }}">
               <input type="hidden" name="state" value="hidden">
+              <input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
               <button class="ignore" type="submit">Ignore</button>
             </form>
           </div>

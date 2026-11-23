@@ -1,6 +1,7 @@
 from collections.abc import Iterable
+from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, tuple_
 from sqlalchemy.orm import Session
 
 from app.collectors.types import NormalizedListing
@@ -56,6 +57,20 @@ def get_listing_states(
         )
         states[(item.source, item.source_listing_id)] = state.state if state else "normal"
     return states
+
+
+def get_listing_first_seen(
+    session: Session, listings: Iterable[NormalizedListing]
+) -> dict[tuple[str, str], datetime]:
+    identities = {(item.source, item.source_listing_id) for item in listings}
+    if not identities:
+        return {}
+    rows = session.execute(
+        select(Listing.source, Listing.source_listing_id, Listing.first_seen_at).where(
+            tuple_(Listing.source, Listing.source_listing_id).in_(identities)
+        )
+    )
+    return {(source, source_listing_id): first_seen_at for source, source_listing_id, first_seen_at in rows}
 
 
 def set_listing_state(

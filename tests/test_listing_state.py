@@ -4,7 +4,12 @@ from sqlalchemy.orm import Session
 
 from app.collectors.types import NormalizedListing
 from app.models import Base, Listing, ListingState
-from app.services.listing_state import get_listing_states, set_listing_state, sync_listings
+from app.services.listing_state import (
+    get_listing_first_seen,
+    get_listing_states,
+    set_listing_state,
+    sync_listings,
+)
 
 
 def sample_listing(*, title: str = "Fender Fat Strat", price_cents: int = 39000):
@@ -60,3 +65,18 @@ def test_invalid_listing_state_is_rejected() -> None:
         sync_listings(session, [sample_listing()])
         with pytest.raises(ValueError, match="Unsupported listing state"):
             set_listing_state(session, "craigslist", "abc123", "deleted")
+
+
+def test_get_listing_first_seen_returns_persisted_timestamp() -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    listing = sample_listing()
+
+    with Session(engine) as session:
+        sync_listings(session, [listing])
+        persisted = session.scalar(select(Listing))
+        assert persisted is not None
+
+        timestamps = get_listing_first_seen(session, [listing])
+
+        assert timestamps[(listing.source, listing.source_listing_id)] == persisted.first_seen_at
