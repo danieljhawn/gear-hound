@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gear Hound</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <p class="eyebrow">AUSTIN / CEDAR PARK</p>
+      <h1>Gear Hound</h1>
+      <p class="lede">Used instruments, strange electronics, and future barter bait.</p>
+    </div>
+    <div class="count">{{ listings|length }} finds under $500</div>
+  </header>
+
+  <main>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    {% if not listings and not error %}<div class="empty">No matching listings found.</div>{% endif %}
+    <section class="grid" aria-label="Gear listings">
+      {% for listing in listings %}
+      <article class="card">
+        <a class="image-wrap" href="{{ listing.url }}" target="_blank" rel="noopener noreferrer">
+          {% if listing.image_url %}
+          <img src="{{ listing.image_url }}" alt="" loading="lazy">
+          {% else %}
+          <div class="no-image">NO IMAGE</div>
+          {% endif %}
+        </a>
+        <div class="card-body">
+          <div class="meta">
+            <span>{{ listing.raw_metadata.category }}</span>
+            <span>{{ listing.location or 'Austin area' }}</span>
+          </div>
+          <h2><a href="{{ listing.url }}" target="_blank" rel="noopener noreferrer">{{ listing.title }}</a></h2>
+          <div class="footer-row">
+            <strong>{% if listing.price_cents is not none %}${{ '%.0f'|format(listing.price_cents / 100) }}{% else %}TRADE{% endif %}</strong>
+            <span>CRAIGSLIST ↗</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+  </main>
+</body>
+</html>

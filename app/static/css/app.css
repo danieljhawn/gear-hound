@@ -1,0 +1,24 @@
+:root { color-scheme: dark; --ink:#f6f0df; --muted:#a9a190; --panel:#181713; --line:#3b382f; --acid:#d8ff4f; --orange:#ff7848; }
+* { box-sizing:border-box; }
+body { margin:0; background:#0d0d0b; color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
+a { color:inherit; text-decoration:none; }
+.site-header { padding:2.5rem clamp(1rem,4vw,4rem); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:end; gap:2rem; background:radial-gradient(circle at 80% 0%,#30371b 0,transparent 35%); }
+.eyebrow { color:var(--acid); font:700 .72rem ui-monospace,monospace; letter-spacing:.18em; }
+h1 { margin:.2rem 0; font-size:clamp(2.8rem,8vw,6.5rem); line-height:.85; letter-spacing:-.07em; }
+.lede { color:var(--muted); margin:.8rem 0 0; }
+.count { border:1px solid var(--acid); color:var(--acid); padding:.7rem 1rem; font:700 .78rem ui-monospace,monospace; white-space:nowrap; }
+main { padding:clamp(1rem,3vw,3rem); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; }
+.card { background:var(--panel); border:1px solid var(--line); overflow:hidden; transition:transform .15s,border-color .15s; }
+.card:hover { transform:translateY(-3px); border-color:var(--acid); }
+.image-wrap { display:block; aspect-ratio:4/3; background:#24221c; overflow:hidden; }
+.image-wrap img { width:100%; height:100%; object-fit:cover; }
+.no-image { height:100%; display:grid; place-items:center; color:#6d685b; font:700 .8rem ui-monospace,monospace; }
+.card-body { padding:1rem; }
+.meta,.footer-row { display:flex; justify-content:space-between; gap:.8rem; text-transform:uppercase; font:700 .65rem ui-monospace,monospace; letter-spacing:.06em; }
+.meta { color:var(--muted); }
+h2 { min-height:3.5em; margin:.75rem 0 1.2rem; font-size:1.05rem; line-height:1.3; }
+.footer-row { align-items:end; color:var(--muted); }
+.footer-row strong { color:var(--orange); font:800 1.5rem ui-monospace,monospace; letter-spacing:-.05em; }
+.error,.empty { padding:1rem; margin-bottom:1rem; border:1px solid var(--orange); color:var(--orange); }
+@media (max-width:600px) { .site-header { align-items:start; flex-direction:column; } .count { white-space:normal; } .grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:.6rem; } .card-body { padding:.75rem; } h2 { font-size:.9rem; } }
